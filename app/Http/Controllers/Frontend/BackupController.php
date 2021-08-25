@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Spatie\Backup\BackupDestination\Backup;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class BackupController extends Controller
 {
@@ -98,6 +99,23 @@ class BackupController extends Controller
      */
     public function destroy($id)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $cek = Trbackup::findOrFail($id);
+            $filename = $cek->Nama;
+            unlink(storage_path('app/public/backup/'.$filename));
+            $cek->delete();
+            DB::commit();
+            return response()->json([
+                'status' => true,
+                'message' => 'deleted'
+            ]);
+        } catch (\Exception $th) {
+            DB::rollBack();
+            return response()->json([
+                'status' => false,
+                'message' => 'error'
+            ]);
+        }
     }
 }

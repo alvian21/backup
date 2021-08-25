@@ -43,6 +43,8 @@
                                         <td>
                                             <a href="{{route('backup.show',[$item->id])}}"
                                                 class="btn btn-info">Download</a>
+                                            <button type="button" class="btn btn-danger delete"
+                                                data-id="{{$item->id}}">Delete</button>
                                         </td>
                                     </tr>
                                     @empty
@@ -69,6 +71,47 @@
         "scrollX": true,
     });
 
+
+    function ajax() {
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+     }
+
+    $(document).on('click','.delete', function () {
+        var id = $(this).data('id');
+        swal({
+            title: "Are you sure?",
+            text: "Once deleted, you will not be able to recover this imaginary file!",
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+            })
+            .then((willDelete) => {
+            if (willDelete) {
+                ajax();
+
+                $.ajax({
+                        url:"{{url('admin/backup/')}}/"+id,
+                        method:"DELETE",
+                        success:function(response){
+                            console.log(response);
+                            if(response.status){
+                                swal("Success!", "Backup berhasil di hapus", "success");
+
+                                setTimeout(function () {    location.reload(true) }, 1500)
+                            }else{
+                                    swal(response.message);
+                            }
+                        }
+                    })
+
+            }
+            });
+
+     })
 })
 </script>
 @endsection

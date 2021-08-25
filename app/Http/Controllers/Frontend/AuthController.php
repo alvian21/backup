@@ -34,11 +34,11 @@ class AuthController extends Controller
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator->errors());
         } else {
-            $user = User::where('UserLogin', $request->get('username'))->where('UserPassword', $request->get('password'))->first();
+            $user = User::where('UserLogin', $request->get('username'))->where('UserPassword', $request->get('password'))->where('BolehBackup',1)->first();
             if ($user) {
                 $auth = Auth::guard("web")->login($user);
                 $user = Auth::guard('web')->user();
-             
+
 
                 session()->flash('info', 'Selamat Datang  !');
                 return redirect()->route('dashboard.index');
