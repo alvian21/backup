@@ -79,7 +79,8 @@ class BackupController extends Controller
 
                 return response()->json([
                     'status' => false,
-                    'message' => 'Maaf ada yang error'
+                    'message' => 'Maaf ada yang error',
+                    'data' => $th
                 ]);
             }
         }
