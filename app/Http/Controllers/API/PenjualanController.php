@@ -53,7 +53,7 @@ class PenjualanController extends Controller
             $mutasihd = json_decode($mutasihd,true);
             $mutasidt = json_decode($mutasidt,true);
 
-            return response($mutasihd);
+            // return response($mutasihd);
             DB::beginTransaction();
             try {
                 foreach ($mutasihd as $key => $value) {
