@@ -30,6 +30,7 @@ Route::group([
 Route::group(['middleware' => [ 'jwt.auth'], 'namespace' => 'API'], function () {
 
         Route::resource('backup', 'BackupController');
+        Route::resource('penjualan', 'PenjualanController');
 
 });
 
