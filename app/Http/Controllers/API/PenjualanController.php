@@ -54,8 +54,8 @@ class PenjualanController extends Controller
             $mutasidt = json_decode($mutasidt,true);
 
             // return response($mutasihd);
-            // DB::beginTransaction();
-            // try {
+            DB::beginTransaction();
+            try {
                 foreach ($mutasihd as $key => $value) {
 
                     $tanggal = date('Y-m-d', strtotime($value['Tanggal']));
@@ -65,12 +65,13 @@ class PenjualanController extends Controller
                         $newmutasi = new Trmutasihd();
                         $newmutasi->Transaksi = 'PENJUALAN';
                         $newmutasi->Nomor = $nomor;
-                        $newmutasi->NomorLokasl = $value['Nomor'];
+                        $newmutasi->NomorLokal = $value['Nomor'];
                         $newmutasi->Tanggal = $value['Tanggal'];
                         $newmutasi->KodeSuppCust = $value['KodeSuppCust'];
                         $newmutasi->DiskonPersen = $value['DiskonPersen'];
                         $newmutasi->DiskonTunai = $value['DiskonTunai'];
                         $newmutasi->Pajak = $value['Pajak'];
+                        $newmutasi->LokasiAwal = $value['LokasiAwal'];
                         $newmutasi->PembayaranTunai = $value['PembayaranTunai'];
                         $newmutasi->PembayaranKredit = $value['PembayaranKredit'];
                         $newmutasi->PembayaranEkop = $value['PembayaranEkop'];
@@ -106,14 +107,14 @@ class PenjualanController extends Controller
                     'status' => true,
                     'message' => 'saved'
                 ]);
-            // } catch (\Exception $th) {
-            //     //throw $th;
-            //     DB::rollBack();
-            //     return response()->json([
-            //         'status' => false,
-            //         'message' => 'error'
-            //     ]);
-            // }
+            } catch (\Exception $th) {
+                //throw $th;
+                DB::rollBack();
+                return response()->json([
+                    'status' => false,
+                    'message' => 'error'
+                ]);
+            }
         }
     }
 
