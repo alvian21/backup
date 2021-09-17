@@ -108,7 +108,7 @@ class PenjualanController extends Controller
                         //pembarayan ekop
                         $pembayaran_ekop = $value['PembayaranEkop'];
                         if ($pembayaran_ekop > 0) {
-                            $cek = DB::connectiselect('call CEKSALDOEKOP(?)', [
+                            $cek = DB::select('call CEKSALDOEKOP(?)', [
                                 $value['KodeSuppCust']
                             ]);
 
@@ -138,7 +138,7 @@ class PenjualanController extends Controller
                         //pembayaran kredit
                         $pembayaran_kredit = $value['PembayaranKredit'];
                         if ($pembayaran_kredit > 0) {
-                            $cek = DB::connectiselect('call CEKSALDOEKOP(?)', [
+                            $cek = DB::select('call CEKSALDOEKOP(?)', [
                                 $value['KodeSuppCust']
                             ]);
 
