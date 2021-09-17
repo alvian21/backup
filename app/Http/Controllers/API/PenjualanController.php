@@ -283,12 +283,7 @@ class PenjualanController extends Controller
                 }
                 DB::commit();
 
-                $arrsaldototalbelanjatunai = [];
-                $arrsaldoekop = [];
-                $arrsaldototalbelanjaekop = [];
-                $arrsaldototalbelanjakredit = [];
-                $arrsaldototalbelanja = [];
-                $arrsaldobarang = [];
+
 
                 return response()->json([
                     'status' => true,
