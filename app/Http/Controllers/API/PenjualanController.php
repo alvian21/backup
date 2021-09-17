@@ -300,7 +300,8 @@ class PenjualanController extends Controller
                 DB::rollBack();
                 return response()->json([
                     'status' => false,
-                    'message' => 'error'
+                    'message' => 'error',
+                    'data' => $th
                 ]);
             }
         }
