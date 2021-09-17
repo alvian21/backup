@@ -48,7 +48,8 @@ class PenjualanController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'trmutasihd' => 'required',
-            'trmutasidt' => 'required'
+            'trmutasidt' => 'required',
+            'KodeLokasi'
         ]);
 
         if ($validator->fails()) {
@@ -58,7 +59,7 @@ class PenjualanController extends Controller
             $mutasidt = $request->get('trmutasidt');
             $mutasihd = json_decode($mutasihd, true);
             $mutasidt = json_decode($mutasidt, true);
-
+            $kodelokasi = $request->get('KodeLokasi');
             // return response($mutasihd);
             DB::beginTransaction();
             try {
@@ -84,7 +85,7 @@ class PenjualanController extends Controller
                         $newmutasi->DiskonPersen = $value['DiskonPersen'];
                         $newmutasi->DiskonTunai = $value['DiskonTunai'];
                         $newmutasi->Pajak = $value['Pajak'];
-                        $newmutasi->LokasiAwal = $value['LokasiAwal'];
+                        $newmutasi->LokasiAwal =  $kodelokasi;
                         $newmutasi->PembayaranTunai = $value['PembayaranTunai'];
                         $newmutasi->PembayaranKredit = $value['PembayaranKredit'];
                         $newmutasi->PembayaranEkop = $value['PembayaranEkop'];
@@ -251,7 +252,7 @@ class PenjualanController extends Controller
                                     'HargaLama' => 0,
                                 ]);
 
-                                $getstok = Trsaldobarang::where('KodeBarang',  $row['KodeBarang'])->where('KodeLokasi', $value['LokasiAwal'])->OrderBy('Tanggal', 'DESC')->first();
+                                $getstok = Trsaldobarang::where('KodeBarang',  $row['KodeBarang'])->where('KodeLokasi',  $kodelokasi)->OrderBy('Tanggal', 'DESC')->first();
                                 $trsaldobarang = new Trsaldobarang();
                                 $trsaldobarang->Tanggal = date('Y-m-d H:i:s');
                                 $trsaldobarang->KodeBarang =  $row['KodeBarang'];
@@ -262,7 +263,7 @@ class PenjualanController extends Controller
                                     $trsaldobarang->Saldo = 0;
                                 }
 
-                                $trsaldobarang->KodeLokasi = $value['LokasiAwal'];
+                                $trsaldobarang->KodeLokasi =  $kodelokasi;
                                 $trsaldobarang->save();
 
                                 $datasaldobarang = [
