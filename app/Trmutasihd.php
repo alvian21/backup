@@ -13,6 +13,6 @@ class Trmutasihd extends Model
     protected $primaryKey = "Nomor";
 
     protected $casts = [
-        'Tanggal' => 'datetime:Y-m-d H:00',
+        'Tanggal' => 'datetime:Y-m-d H:i:s',
     ];
 }

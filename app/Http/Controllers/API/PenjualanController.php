@@ -62,17 +62,24 @@ class PenjualanController extends Controller
             // return response($mutasihd);
             DB::beginTransaction();
             try {
+
+                $arrsaldototalbelanjatunai = [];
+                $arrsaldoekop = [];
+                $arrsaldototalbelanjaekop = [];
+                $arrsaldototalbelanjakredit = [];
+                $arrsaldototalbelanja = [];
+                $arrsaldobarang = [];
                 foreach ($mutasihd as $key => $value) {
 
                     $tanggal = date('Y-m-d', strtotime($value['Tanggal']));
-                    $cekmutasi = Trmutasihd::whereDate('Tanggal', $tanggal)->where('NomorLokal', $value['Nomor'])->whereNotNull('NomorLokal')->first();
+                    $cekmutasi = Trmutasihd::whereDate('Tanggal', $tanggal)->whereTime('Tanggal', $value['Tanggal'])->where('NomorLokal', $value['Nomor'])->whereNotNull('NomorLokal')->first();
                     if (!$cekmutasi) {
                         $nomor = $this->generateNomor($tanggal);
                         $newmutasi = new Trmutasihd();
                         $newmutasi->Transaksi = 'PENJUALAN';
                         $newmutasi->Nomor = $nomor;
                         $newmutasi->NomorLokal = $value['Nomor'];
-                        $newmutasi->Tanggal = $value['Tanggal'];
+                        $newmutasi->Tanggal = date('Y-m-d H:i:s', strtotime($value['Tanggal']));
                         $newmutasi->KodeSuppCust = $value['KodeSuppCust'];
                         $newmutasi->DiskonPersen = $value['DiskonPersen'];
                         $newmutasi->DiskonTunai = $value['DiskonTunai'];
@@ -103,6 +110,14 @@ class PenjualanController extends Controller
                                 $trsaldobelanjatunai->Saldo = $tunai;
                             }
                             $trsaldobelanjatunai->save();
+
+                            $datatunai = [
+                                'Tanggal' =>    $trsaldobelanjatunai->Tanggal,
+                                'KodeUser' =>    $trsaldobelanjatunai->KodeUser,
+                                'Saldo' =>    $trsaldobelanjatunai->Saldo,
+                            ];
+
+                            array_push($arrsaldototalbelanjatunai, $datatunai);
                         }
 
                         //pembarayan ekop
@@ -120,6 +135,13 @@ class PenjualanController extends Controller
                                 $trsaldoekop->Saldo = $cek[0]->Saldo -  $pembayaran_ekop;
                                 $trsaldoekop->save();
 
+                                $datasaldoekop = [
+                                    'Tanggal' =>    $trsaldoekop->Tanggal,
+                                    'KodeUser' =>    $trsaldoekop->KodeUser,
+                                    'Saldo' =>    $trsaldoekop->Saldo,
+                                ];
+
+                                array_push($arrsaldoekop, $datasaldoekop);
 
                                 $gettotalbelanjaekop = Trsaldototalbelanjaekop::where('KodeUser', $value['KodeSuppCust'])->orderBy('Tanggal', 'DESC')->first();
                                 $totalbelanjaekop = 0;
@@ -132,6 +154,16 @@ class PenjualanController extends Controller
                                 $trsaldototalbelanjaekop->KodeUser = $value['KodeSuppCust'];
                                 $trsaldototalbelanjaekop->Saldo = $totalbelanjaekop + $pembayaran_ekop;
                                 $trsaldototalbelanjaekop->save();
+
+
+                                $datasaldototalbelanjaekop = [
+                                    'Tanggal' =>    $trsaldototalbelanjaekop->Tanggal,
+                                    'KodeUser' =>    $trsaldototalbelanjaekop->KodeUser,
+                                    'Saldo' =>    $trsaldototalbelanjaekop->Saldo,
+                                ];
+
+                                array_push($arrsaldototalbelanjaekop, $datasaldototalbelanjaekop);
+
                             }
                         }
 
@@ -161,6 +193,22 @@ class PenjualanController extends Controller
                                 }
                                 $trsaldoekop->save();
                                 $trsaldokredit->save();
+
+                                $datasaldoekop = [
+                                    'Tanggal' =>    $trsaldoekop->Tanggal,
+                                    'KodeUser' =>    $trsaldoekop->KodeUser,
+                                    'Saldo' =>    $trsaldoekop->Saldo,
+                                ];
+
+                                array_push($arrsaldoekop, $datasaldoekop);
+
+                                $datasaldototalbelanjakredit = [
+                                    'Tanggal' =>    $trsaldokredit->Tanggal,
+                                    'KodeUser' =>    $trsaldokredit->KodeUser,
+                                    'Saldo' =>    $trsaldokredit->Saldo,
+                                ];
+
+                                array_push($arrsaldototalbelanjakredit, $datasaldototalbelanjakredit);
                             }
                         }
 
@@ -176,6 +224,13 @@ class PenjualanController extends Controller
                             $trsaldototalbelanja->Saldo = $pembayaran_kredit + $tunai + $pembayaran_ekop;
                         }
                         $trsaldototalbelanja->save();
+                        $datasaldototalbelanja = [
+                            'Tanggal' =>    $trsaldototalbelanja->Tanggal,
+                            'KodeUser' =>    $trsaldototalbelanja->KodeUser,
+                            'Saldo' =>    $trsaldototalbelanja->Saldo,
+                        ];
+
+                        array_push($arrsaldototalbelanja, $datasaldototalbelanja);
 
 
 
@@ -210,6 +265,16 @@ class PenjualanController extends Controller
                                 $trsaldobarang->KodeLokasi = $value['LokasiAwal'];
                                 $trsaldobarang->save();
 
+                                $datasaldobarang = [
+                                    'Tanggal' =>    $trsaldobarang->Tanggal,
+                                    'KodeBarang' =>    $trsaldobarang->KodeBarang,
+                                    'Saldo' =>    $trsaldobarang->Saldo,
+                                    'KodeLokasi' =>    $trsaldobarang->KodeLokasi,
+                                ];
+
+                                array_push($arrsaldobarang, $datasaldobarang);
+
+
                             }
                         }
 
@@ -218,9 +283,22 @@ class PenjualanController extends Controller
                 }
                 DB::commit();
 
+                $arrsaldototalbelanjatunai = [];
+                $arrsaldoekop = [];
+                $arrsaldototalbelanjaekop = [];
+                $arrsaldototalbelanjakredit = [];
+                $arrsaldototalbelanja = [];
+                $arrsaldobarang = [];
+
                 return response()->json([
                     'status' => true,
-                    'message' => 'saved'
+                    'message' => 'saved',
+                    'saldototalbelanjatunai' => $arrsaldototalbelanjatunai,
+                    'saldoekop' => $arrsaldoekop,
+                    'saldototalbelanjaekop' => $arrsaldototalbelanjaekop,
+                    'saldototalbelanjakredit' => $arrsaldototalbelanjakredit,
+                    'saldototalbelanja' => $arrsaldototalbelanja,
+                    'saldobarang' => $arrsaldobarang
                 ]);
             } catch (\Exception $th) {
                 //throw $th;
