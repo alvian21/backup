@@ -7,6 +7,12 @@ use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use App\Trsaldototalbelanjakredit;
+use App\Trsaldototalbelanjatunai;
+use App\Trsaldobarang;
+use App\Trsaldototalbelanjaekop;
+use App\Trsaldototalbelanja;
+use App\Trsaldoekop;
 use App\Trmutasidt;
 use App\Trmutasihd;
 
@@ -50,8 +56,8 @@ class PenjualanController extends Controller
         } else {
             $mutasihd = $request->get('trmutasihd');
             $mutasidt = $request->get('trmutasidt');
-            $mutasihd = json_decode($mutasihd,true);
-            $mutasidt = json_decode($mutasidt,true);
+            $mutasihd = json_decode($mutasihd, true);
+            $mutasidt = json_decode($mutasidt, true);
 
             // return response($mutasihd);
             DB::beginTransaction();
@@ -77,9 +83,101 @@ class PenjualanController extends Controller
                         $newmutasi->PembayaranEkop = $value['PembayaranEkop'];
                         $newmutasi->TotalHarga = $value['TotalHarga'];
                         $newmutasi->StatusPesanan = $value['StatusPesanan'];
+                        $newmutasi->LastUpdateSP = $value['LastUpdateSP'];
+                        $newmutasi->UserUpdateSP = $value['UserUpdateSP'];
                         $newmutasi->TotalHargaSetelahPajak = $value['TotalHargaSetelahPajak'];
                         $newmutasi->DueDate = $value['DueDate'];
                         $newmutasi->save();
+
+                        $tunai = $value['PembayaranTunai'];
+                        $tunai = intval($tunai);
+                        if ($tunai > 0 && $tunai != 0) {
+                            $cektunai = Trsaldototalbelanjatunai::where('KodeUser', $value['KodeSuppCust'])->OrderBy('Tanggal', 'DESC')->first();
+                            $trsaldobelanjatunai = new Trsaldototalbelanjatunai();
+
+                            $trsaldobelanjatunai->Tanggal = date('Y-m-d H:i:s');
+                            $trsaldobelanjatunai->KodeUser = $value['KodeSuppCust'];
+                            if ($cektunai) {
+                                $trsaldobelanjatunai->Saldo = $tunai + $cektunai->Saldo;
+                            } else {
+                                $trsaldobelanjatunai->Saldo = $tunai;
+                            }
+                            $trsaldobelanjatunai->save();
+                        }
+
+                        //pembarayan ekop
+                        $pembayaran_ekop = $value['PembayaranEkop'];
+                        if ($pembayaran_ekop > 0) {
+                            $cek = DB::connectiselect('call CEKSALDOEKOP(?)', [
+                                $value['KodeSuppCust']
+                            ]);
+
+                            if (isset($cek[0])) {
+                                $trsaldoekop = new Trsaldoekop();
+
+                                $trsaldoekop->Tanggal = date('Y-m-d H:i:s');
+                                $trsaldoekop->KodeUser = $value['KodeSuppCust'];
+                                $trsaldoekop->Saldo = $cek[0]->Saldo -  $pembayaran_ekop;
+                                $trsaldoekop->save();
+
+
+                                $gettotalbelanjaekop = Trsaldototalbelanjaekop::where('KodeUser', $value['KodeSuppCust'])->orderBy('Tanggal', 'DESC')->first();
+                                $totalbelanjaekop = 0;
+                                if ($gettotalbelanjaekop) {
+                                    $totalbelanjaekop = $gettotalbelanjaekop->Saldo;
+                                }
+
+                                $trsaldototalbelanjaekop = new Trsaldototalbelanjaekop();
+                                $trsaldototalbelanjaekop->Tanggal = date('Y-m-d H:i:s');
+                                $trsaldototalbelanjaekop->KodeUser = $value['KodeSuppCust'];
+                                $trsaldototalbelanjaekop->Saldo = $totalbelanjaekop + $pembayaran_ekop;
+                                $trsaldototalbelanjaekop->save();
+                            }
+                        }
+
+                        //pembayaran kredit
+                        $pembayaran_kredit = $value['PembayaranKredit'];
+                        if ($pembayaran_kredit > 0) {
+                            $cek = DB::connectiselect('call CEKSALDOEKOP(?)', [
+                                $value['KodeSuppCust']
+                            ]);
+
+                            if (isset($cek[0])) {
+                                $trsaldoekop = new Trsaldoekop();
+                                $trsaldoekop->Tanggal = date('Y-m-d H:i:s');
+                                $trsaldoekop->KodeUser = $value['KodeSuppCust'];
+
+
+                                $trsaldokredit = new Trsaldototalbelanjakredit();
+                                $trsaldokredit->Tanggal = date('Y-m-d H:i:s');
+                                $trsaldokredit->KodeUser = $value['KodeSuppCust'];
+                                $trsaldoekop->Saldo = round($cek[0]->Saldo, 2) + $pembayaran_kredit;
+
+                                $cekkredit = Trsaldototalbelanjakredit::where('KodeUser', $value['KodeSuppCust'])->OrderBy('Tanggal', 'DESC')->first();
+                                if ($cekkredit) {
+                                    $trsaldokredit->Saldo = $pembayaran_kredit + round($cekkredit->Saldo, 2);
+                                } else {
+                                    $trsaldokredit->Saldo = $pembayaran_kredit;
+                                }
+                                $trsaldoekop->save();
+                                $trsaldokredit->save();
+                            }
+                        }
+
+                        //trsaldototalbelanja
+                        $cektotalbelanja = Trsaldototalbelanja::where('KodeUser', $value['KodeSuppCust'])->OrderBy('Tanggal', 'DESC')->first();
+                        $trsaldototalbelanja = new Trsaldototalbelanja();
+
+                        $trsaldototalbelanja->Tanggal = date('Y-m-d H:i:s');
+                        $trsaldototalbelanja->KodeUser = $value['KodeSuppCust'];
+                        if ($cektotalbelanja) {
+                            $trsaldototalbelanja->Saldo = $pembayaran_kredit + $tunai + $pembayaran_ekop + $cektotalbelanja->Saldo;
+                        } else {
+                            $trsaldototalbelanja->Saldo = $pembayaran_kredit + $tunai + $pembayaran_ekop;
+                        }
+                        $trsaldototalbelanja->save();
+
+
 
                         foreach ($mutasidt as $key => $row) {
                             if ($row['Nomor'] == $value['Nomor'] && $row['LastUpdate'] == $value['Tanggal']) {
@@ -97,8 +195,25 @@ class PenjualanController extends Controller
                                     'Satuan' => $row['Satuan'],
                                     'HargaLama' => 0,
                                 ]);
+
+                                $getstok = Trsaldobarang::where('KodeBarang',  $row['KodeBarang'])->where('KodeLokasi', $value['LokasiAwal'])->OrderBy('Tanggal', 'DESC')->first();
+                                $trsaldobarang = new Trsaldobarang();
+                                $trsaldobarang->Tanggal = date('Y-m-d H:i:s');
+                                $trsaldobarang->KodeBarang =  $row['KodeBarang'];
+                                if ($getstok) {
+                                    $saldobarang = $getstok->Saldo -  $row['Jumlah'];
+                                    $trsaldobarang->Saldo = $saldobarang;
+                                } else {
+                                    $trsaldobarang->Saldo = 0;
+                                }
+
+                                $trsaldobarang->KodeLokasi = $value['LokasiAwal'];
+                                $trsaldobarang->save();
+
                             }
                         }
+
+
                     }
                 }
                 DB::commit();
