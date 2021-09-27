@@ -49,7 +49,7 @@ class PenjualanController extends Controller
         $validator = Validator::make($request->all(), [
             'trmutasihd' => 'required',
             'trmutasidt' => 'required',
-            'KodeLokasi'
+            'KodeLokasi' => 'required',
         ]);
 
         if ($validator->fails()) {
