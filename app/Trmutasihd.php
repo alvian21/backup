@@ -15,4 +15,10 @@ class Trmutasihd extends Model
     protected $casts = [
         'Tanggal' => 'datetime:Y-m-d H:i:s',
     ];
+
+    public function trmutasidt()
+    {
+        return $this->hasMany('App\Trmutasidt','Nomor','Nomor');
+    }
+
 }

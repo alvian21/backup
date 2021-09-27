@@ -12,4 +12,10 @@ class Trmutasidt extends Model
     protected $casts = [
         'LastUpdate' => 'datetime:Y-m-d H:00',
     ];
+
+    public function trmutasihd()
+    {
+        return $this->belongsTo('App\Trmutasihd');
+    }
+
 }
