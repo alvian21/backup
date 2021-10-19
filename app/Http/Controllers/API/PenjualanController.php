@@ -77,7 +77,7 @@ class PenjualanController extends Controller
                     foreach ($mutasihd as $key => $value) {
 
                         $tanggal = date('Y-m-d', strtotime($value['Tanggal']));
-                        $cekmutasi = Trmutasihd::whereDate('Tanggal', $tanggal)->whereTime('Tanggal', $value['Tanggal'])->where('NomorLokal', $value['Nomor'])->whereNotNull('NomorLokal')->first();
+                        $cekmutasi = Trmutasihd::where('NomorLokal', $value['Nomor'])->whereNotNull('NomorLokal')->first();
                         if (!$cekmutasi) {
                             $nomor = $this->generateNomor($tanggal);
                             $newmutasi = new Trmutasihd();
