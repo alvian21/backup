@@ -297,8 +297,22 @@ class PenjualanController extends Controller
                         'saldobarang' => $arrsaldobarang
                     ]);
                 } else {
+                    $anggota = Msanggota::all();
+                    foreach ($anggota as $key => $value) {
+                        $tempsaldoekop = Trsaldoekop::where('KodeUser', $value->Kode)->orderBy('Tanggal', 'DESC')->first();
+                        array_push($arrsaldoekop, $tempsaldoekop);
+                    }
+
+                    DB::commit();
                     return response()->json([
-                        'status' => false,
+                        'status' => true,
+                        'message' => 'saved',
+                        'saldototalbelanjatunai' => $arrsaldototalbelanjatunai,
+                        'saldoekop' => $arrsaldoekop,
+                        'saldototalbelanjaekop' => $arrsaldototalbelanjaekop,
+                        'saldototalbelanjakredit' => $arrsaldototalbelanjakredit,
+                        'saldototalbelanja' => $arrsaldototalbelanja,
+                        'saldobarang' => $arrsaldobarang
                     ]);
                 }
             } catch (\Exception $th) {
