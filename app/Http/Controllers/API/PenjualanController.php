@@ -307,7 +307,12 @@ class PenjualanController extends Controller
                     return response()->json([
                         'status' => true,
                         'message' => 'saved',
+                        'saldototalbelanjatunai' => $arrsaldototalbelanjatunai,
                         'saldoekop' => $arrsaldoekop,
+                        'saldototalbelanjaekop' => $arrsaldototalbelanjaekop,
+                        'saldototalbelanjakredit' => $arrsaldototalbelanjakredit,
+                        'saldototalbelanja' => $arrsaldototalbelanja,
+                        'saldobarang' => $arrsaldobarang
                     ]);
                 }
             } catch (\Exception $th) {
